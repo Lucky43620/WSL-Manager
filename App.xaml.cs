@@ -1,50 +1,87 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
-using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace WSL_Manager
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     public partial class App : Application
     {
         private Window? _window;
+        private static readonly string LogFilePath =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WSL Manager", "logs.txt");
 
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
-        /// </summary>
         public App()
         {
             InitializeComponent();
+
+            // Handlers globaux pour attraper les exceptions et les écrire dans un fichier de log
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            this.UnhandledException += App_UnhandledException;
         }
 
-        /// <summary>
-        /// Invoked when the application is launched.
-        /// </summary>
-        /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            _window = new MainWindow();
-            _window.Activate();
+            try
+            {
+                _window = new MainWindow();
+                _window.Activate();
+                LogInfo("Application lancée avec succès.");
+            }
+            catch (Exception ex)
+            {
+                LogError("Exception dans OnLaunched", ex);
+                throw;
+            }
+        }
+
+        private void App_UnhandledException(object? sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            LogError("UnhandledException UI thread", e.Exception);
+        }
+
+        private void CurrentDomain_UnhandledException(object? sender, System.UnhandledExceptionEventArgs e)
+        {
+            LogError("CurrentDomain.UnhandledException", e.ExceptionObject as Exception);
+        }
+
+        private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+        {
+            LogError("TaskScheduler.UnobservedTaskException", e.Exception);
+            e.SetObserved();
+        }
+
+        private static void EnsureLogDirectory()
+        {
+            try
+            {
+                var dir = Path.GetDirectoryName(LogFilePath);
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir!);
+            }
+            catch { /* Échec de la création de dossier, on ignore pour ne pas casser l'app */ }
+        }
+
+        private static void LogInfo(string message)
+        {
+            try
+            {
+                EnsureLogDirectory();
+                File.AppendAllText(LogFilePath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [INFO] {message}{Environment.NewLine}");
+            }
+            catch { }
+        }
+
+        private static void LogError(string message, Exception? ex)
+        {
+            try
+            {
+                EnsureLogDirectory();
+                File.AppendAllText(LogFilePath,
+                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [ERROR] {message} - {ex?.Message}{Environment.NewLine}{ex?.StackTrace}{Environment.NewLine}");
+            }
+            catch { }
         }
     }
 }
