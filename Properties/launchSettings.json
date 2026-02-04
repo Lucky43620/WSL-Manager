@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "WSL Manager (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "WSL Manager (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
