@@ -128,6 +128,46 @@ namespace WSL_Manager.ViewModels
         /// </summary>
         public ICommand UpdateInstanceCommand { get; }
 
+        /// <summary>
+        /// Commande pour afficher l'état WSL
+        /// </summary>
+        public ICommand ShowWslStatusCommand { get; }
+
+        /// <summary>
+        /// Commande pour afficher la version WSL
+        /// </summary>
+        public ICommand ShowWslVersionCommand { get; }
+
+        /// <summary>
+        /// Commande pour importer une distribution
+        /// </summary>
+        public ICommand ImportDistributionCommand { get; }
+
+        /// <summary>
+        /// Commande pour monter un disque
+        /// </summary>
+        public ICommand MountDiskCommand { get; }
+
+        /// <summary>
+        /// Commande pour démonter un disque
+        /// </summary>
+        public ICommand UnmountDiskCommand { get; }
+
+        /// <summary>
+        /// Commande pour définir la version WSL par défaut
+        /// </summary>
+        public ICommand SetDefaultVersionCommand { get; }
+
+        /// <summary>
+        /// Commande pour ouvrir un terminal avec utilisateur spécifique
+        /// </summary>
+        public ICommand OpenTerminalAsUserCommand { get; }
+
+        /// <summary>
+        /// Commande pour exporter avec options avancées
+        /// </summary>
+        public ICommand ExportAdvancedCommand { get; }
+
         #endregion
 
         public MainViewModel()
@@ -152,6 +192,16 @@ namespace WSL_Manager.ViewModels
             ShutdownAllCommand = new RelayCommand(async () => await ShutdownAllDistributionsAsync());
             InstallDistributionCommand = new RelayCommand(async () => await ShowInstallDialogAsync());
             UpdateInstanceCommand = new RelayCommand<WslDistribution>(async (dist) => await UpdateInstanceAsync(dist));
+
+            // Nouvelles commandes
+            ShowWslStatusCommand = new RelayCommand(async () => await ShowWslStatusAsync());
+            ShowWslVersionCommand = new RelayCommand(async () => await ShowWslVersionAsync());
+            ImportDistributionCommand = new RelayCommand(async () => await ImportDistributionAsync());
+            MountDiskCommand = new RelayCommand(async () => await MountDiskAsync());
+            UnmountDiskCommand = new RelayCommand(async () => await UnmountDiskAsync());
+            SetDefaultVersionCommand = new RelayCommand(async () => await SetDefaultVersionAsync());
+            OpenTerminalAsUserCommand = new RelayCommand<WslDistribution>(async (dist) => await OpenTerminalAsUserAsync(dist));
+            ExportAdvancedCommand = new RelayCommand<WslDistribution>(async (dist) => await ExportDistributionAdvancedAsync(dist));
 
             // Charge les distributions au démarrage
             _ = LoadDistributionsAsync();
@@ -517,7 +567,7 @@ namespace WSL_Manager.ViewModels
                     "Mise à jour"
                 );
 
-                var success = await _wslService.UpdateWslAsync();
+                var (success, error) = await _wslService.UpdateWslAsync();
 
                 if (success)
                 {
@@ -529,7 +579,7 @@ namespace WSL_Manager.ViewModels
                 else
                 {
                     _notificationService.ShowWarning(
-                        "La mise à jour de WSL a échoué ou est déjà à jour.",
+                        error ?? "La mise à jour de WSL a échoué ou est déjà à jour.",
                         "Mise à jour"
                     );
                 }
@@ -620,7 +670,7 @@ namespace WSL_Manager.ViewModels
                     "Export en cours"
                 );
 
-                var success = await _wslService.ExportDistributionAsync(distribution.Name, exportPath);
+                var (success, error) = await _wslService.ExportDistributionAsync(distribution.Name, exportPath);
 
                 if (success)
                 {
@@ -632,7 +682,7 @@ namespace WSL_Manager.ViewModels
                 else
                 {
                     _notificationService.ShowError(
-                        $"Impossible d'exporter '{distribution.Name}'.",
+                        error ?? $"Impossible d'exporter '{distribution.Name}'.",
                         "Erreur d'export"
                     );
                 }
@@ -771,7 +821,7 @@ namespace WSL_Manager.ViewModels
             {
                 // Pour l'instant, on installe Ubuntu par défaut
                 // TODO: Ajouter un dialogue pour choisir la distribution
-                var success = await _wslService.InstallDistributionAsync("Ubuntu");
+                var (success, error) = await _wslService.InstallDistributionAsync("Ubuntu");
 
                 if (success)
                 {
@@ -784,7 +834,7 @@ namespace WSL_Manager.ViewModels
                 else
                 {
                     _notificationService.ShowWarning(
-                        "L'installation a échoué ou Ubuntu est déjà installé.",
+                        error ?? "L'installation a échoué ou Ubuntu est déjà installé.",
                         "Installation"
                     );
                 }
@@ -859,5 +909,131 @@ namespace WSL_Manager.ViewModels
                 IsLoading = false;
             }
         }
+
+        #region Nouvelles commandes
+
+        /// <summary>
+        /// Affiche l'état détaillé de WSL
+        /// </summary>
+        private async Task ShowWslStatusAsync()
+        {
+            IsLoading = true;
+            try
+            {
+                var (success, output, error) = await _wslService.GetWslStatusAsync();
+                if (success)
+                {
+                    _notificationService.ShowInfo(output, Messages.TitleWslStatus);
+                }
+                else
+                {
+                    _notificationService.ShowError(
+                        string.Format(Messages.WslStatusError, error ?? "Erreur inconnue"),
+                        Messages.TitleError
+                    );
+                }
+            }
+            catch (System.Exception ex)
+            {
+                _notificationService.ShowError(
+                    string.Format(Messages.WslStatusError, ex.Message),
+                    Messages.TitleError
+                );
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// Affiche la version de WSL installée
+        /// </summary>
+        private async Task ShowWslVersionAsync()
+        {
+            IsLoading = true;
+            try
+            {
+                var (success, output, error) = await _wslService.GetWslVersionAsync();
+                if (success)
+                {
+                    _notificationService.ShowInfo(output, Messages.TitleWslVersion);
+                }
+                else
+                {
+                    _notificationService.ShowError(
+                        string.Format(Messages.WslVersionError, error ?? "Erreur inconnue"),
+                        Messages.TitleError
+                    );
+                }
+            }
+            catch (System.Exception ex)
+            {
+                _notificationService.ShowError(
+                    string.Format(Messages.WslVersionError, ex.Message),
+                    Messages.TitleError
+                );
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// Importe une distribution - Affiche un dialogue (implémentation dans MainWindow)
+        /// </summary>
+        private async Task ImportDistributionAsync()
+        {
+            // Cette méthode sera appelée par le dialogue dans MainWindow.xaml.cs
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Monte un disque - Affiche un dialogue (implémentation dans MainWindow)
+        /// </summary>
+        private async Task MountDiskAsync()
+        {
+            // Cette méthode sera appelée par le dialogue dans MainWindow.xaml.cs
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Démonte un disque - Affiche un dialogue (implémentation dans MainWindow)
+        /// </summary>
+        private async Task UnmountDiskAsync()
+        {
+            // Cette méthode sera appelée par le dialogue dans MainWindow.xaml.cs
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Définit la version WSL par défaut - Affiche un dialogue (implémentation dans MainWindow)
+        /// </summary>
+        private async Task SetDefaultVersionAsync()
+        {
+            // Cette méthode sera appelée par le dialogue dans MainWindow.xaml.cs
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Ouvre un terminal avec utilisateur spécifique - Affiche un dialogue (implémentation dans MainWindow)
+        /// </summary>
+        private async Task OpenTerminalAsUserAsync(WslDistribution? distribution)
+        {
+            // Cette méthode sera appelée par le dialogue dans MainWindow.xaml.cs
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Exporte une distribution avec options avancées - Affiche un dialogue (implémentation dans MainWindow)
+        /// </summary>
+        private async Task ExportDistributionAdvancedAsync(WslDistribution? distribution)
+        {
+            // Cette méthode sera appelée par le dialogue dans MainWindow.xaml.cs
+            await Task.CompletedTask;
+        }
+
+        #endregion
     }
 }

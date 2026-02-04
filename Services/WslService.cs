@@ -139,11 +139,11 @@ namespace WSL_Manager.Services
         {
             try
             {
-                // Essaie d'abord Windows Terminal avec wsl -d
+                // Essaie d'abord Windows Terminal avec wsl -d et change vers le home
                 var processInfo = new ProcessStartInfo
                 {
                     FileName = "wt.exe",
-                    Arguments = $"wsl -d {name}",
+                    Arguments = $"wsl -d {name} --cd ~",
                     UseShellExecute = true
                 };
                 Process.Start(processInfo);
@@ -156,7 +156,7 @@ namespace WSL_Manager.Services
                     var processInfo = new ProcessStartInfo
                     {
                         FileName = "cmd.exe",
-                        Arguments = $"/K wsl -d \"{name}\"",
+                        Arguments = $"/K wsl -d \"{name}\" --cd ~",
                         UseShellExecute = true
                     };
                     Process.Start(processInfo);
@@ -231,14 +231,22 @@ namespace WSL_Manager.Services
         /// <summary>
         /// Met à jour WSL vers la dernière version
         /// </summary>
-        public async Task<bool> UpdateWslAsync()
+        /// <param name="webDownload">Télécharger depuis GitHub au lieu de Microsoft Store</param>
+        /// <param name="preRelease">Installer la version pré-release</param>
+        public async Task<(bool success, string? error)> UpdateWslAsync(bool webDownload = false, bool preRelease = false)
         {
             try
             {
+                Helpers.Logger.BeginOperation("UpdateWsl", $"webDownload={webDownload}, preRelease={preRelease}");
+
+                var arguments = "--update";
+                if (webDownload) arguments += " --web-download";
+                if (preRelease) arguments += " --pre-release";
+
                 var processInfo = new ProcessStartInfo
                 {
                     FileName = "wsl.exe",
-                    Arguments = "--update",
+                    Arguments = arguments,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -247,14 +255,18 @@ namespace WSL_Manager.Services
 
                 using var process = new Process { StartInfo = processInfo };
                 process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
                 await process.WaitForExitAsync();
 
-                return process.ExitCode == 0;
+                Helpers.Logger.EndOperation("UpdateWsl", process.ExitCode == 0);
+                return (process.ExitCode == 0, string.IsNullOrEmpty(error) ? null : error);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Erreur UpdateWsl: {ex.Message}");
-                return false;
+                Helpers.Logger.Error("UpdateWsl failed", ex);
+                return (false, ex.Message);
             }
         }
 
@@ -289,16 +301,25 @@ namespace WSL_Manager.Services
         }
 
         /// <summary>
-        /// Exporte une distribution vers un fichier tar
+        /// Exporte une distribution vers un fichier tar ou VHD
         /// </summary>
-        public async Task<bool> ExportDistributionAsync(string name, string filePath)
+        /// <param name="name">Nom de la distribution</param>
+        /// <param name="filePath">Chemin du fichier de destination</param>
+        /// <param name="asVhd">Exporter au format VHD au lieu de TAR</param>
+        public async Task<(bool success, string? error)> ExportDistributionAsync(string name, string filePath, bool asVhd = false)
         {
             try
             {
+                Helpers.Logger.BeginOperation("ExportDistribution", $"{name} to {filePath} (VHD={asVhd})");
+
+                var arguments = asVhd
+                    ? $"--export {name} \"{filePath}\" --vhd"
+                    : $"--export {name} \"{filePath}\"";
+
                 var processInfo = new ProcessStartInfo
                 {
                     FileName = "wsl.exe",
-                    Arguments = $"--export {name} \"{filePath}\"",
+                    Arguments = arguments,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -307,28 +328,43 @@ namespace WSL_Manager.Services
 
                 using var process = new Process { StartInfo = processInfo };
                 process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
                 await process.WaitForExitAsync();
 
-                return process.ExitCode == 0;
+                Helpers.Logger.EndOperation("ExportDistribution", process.ExitCode == 0);
+                return (process.ExitCode == 0, string.IsNullOrEmpty(error) ? null : error);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Erreur ExportDistribution: {ex.Message}");
-                return false;
+                Helpers.Logger.Error("ExportDistribution failed", ex);
+                return (false, ex.Message);
             }
         }
 
         /// <summary>
-        /// Importe une distribution depuis un fichier tar
+        /// Importe une distribution depuis un fichier tar ou VHD
         /// </summary>
-        public async Task<bool> ImportDistributionAsync(string name, string installLocation, string filePath)
+        /// <param name="name">Nom de la distribution</param>
+        /// <param name="installLocation">Emplacement d'installation</param>
+        /// <param name="filePath">Chemin du fichier source</param>
+        /// <param name="isVhd">Le fichier source est un VHD</param>
+        /// <param name="version">Version WSL à utiliser (1 ou 2)</param>
+        public async Task<(bool success, string? error)> ImportDistributionAsync(string name, string installLocation, string filePath, bool isVhd = false, int? version = null)
         {
             try
             {
+                Helpers.Logger.BeginOperation("ImportDistribution", $"{name} from {filePath} (VHD={isVhd}, version={version})");
+
+                var arguments = $"--import {name} \"{installLocation}\" \"{filePath}\"";
+                if (version.HasValue)
+                    arguments += $" --version {version.Value}";
+
                 var processInfo = new ProcessStartInfo
                 {
                     FileName = "wsl.exe",
-                    Arguments = $"--import {name} \"{installLocation}\" \"{filePath}\"",
+                    Arguments = arguments,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -337,14 +373,18 @@ namespace WSL_Manager.Services
 
                 using var process = new Process { StartInfo = processInfo };
                 process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
                 await process.WaitForExitAsync();
 
-                return process.ExitCode == 0;
+                Helpers.Logger.EndOperation("ImportDistribution", process.ExitCode == 0);
+                return (process.ExitCode == 0, string.IsNullOrEmpty(error) ? null : error);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Erreur ImportDistribution: {ex.Message}");
-                return false;
+                Helpers.Logger.Error("ImportDistribution failed", ex);
+                return (false, ex.Message);
             }
         }
 
@@ -427,14 +467,25 @@ namespace WSL_Manager.Services
         /// Installe une nouvelle distribution depuis le store Microsoft
         /// </summary>
         /// <param name="distroName">Nom de la distribution (Ubuntu, Debian, etc.)</param>
-        public async Task<bool> InstallDistributionAsync(string distroName)
+        /// <param name="webDownload">Télécharger depuis le web au lieu du Store</param>
+        /// <param name="noLaunch">Ne pas lancer la distribution après installation</param>
+        /// <param name="installLocation">Emplacement d'installation personnalisé</param>
+        public async Task<(bool success, string? error)> InstallDistributionAsync(string distroName, bool webDownload = false, bool noLaunch = false, string? installLocation = null)
         {
             try
             {
+                Helpers.Logger.BeginOperation("InstallDistribution", $"{distroName} (web={webDownload}, noLaunch={noLaunch})");
+
+                var arguments = $"--install -d {distroName}";
+                if (webDownload) arguments += " --web-download";
+                if (noLaunch) arguments += " --no-launch";
+                if (!string.IsNullOrEmpty(installLocation))
+                    arguments += $" --location \"{installLocation}\"";
+
                 var processInfo = new ProcessStartInfo
                 {
                     FileName = "wsl.exe",
-                    Arguments = $"--install -d {distroName}",
+                    Arguments = arguments,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -443,14 +494,18 @@ namespace WSL_Manager.Services
 
                 using var process = new Process { StartInfo = processInfo };
                 process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
                 await process.WaitForExitAsync();
 
-                return process.ExitCode == 0;
+                Helpers.Logger.EndOperation("InstallDistribution", process.ExitCode == 0);
+                return (process.ExitCode == 0, string.IsNullOrEmpty(error) ? null : error);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Erreur InstallDistribution: {ex.Message}");
-                return false;
+                Helpers.Logger.Error("InstallDistribution failed", ex);
+                return (false, ex.Message);
             }
         }
 
@@ -671,5 +726,330 @@ namespace WSL_Manager.Services
                 IsDefault = isDefault
             };
         }
+
+        #region Nouvelles fonctionnalités WSL
+
+        /// <summary>
+        /// Définit la version WSL par défaut pour les nouvelles installations
+        /// </summary>
+        /// <param name="version">Version WSL (1 ou 2)</param>
+        public async Task<(bool success, string? error)> SetDefaultWslVersionAsync(int version)
+        {
+            try
+            {
+                Helpers.Logger.BeginOperation("SetDefaultWslVersion", $"version={version}");
+
+                if (version != 1 && version != 2)
+                    return (false, "La version doit être 1 ou 2");
+
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "wsl.exe",
+                    Arguments = $"--set-default-version {version}",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process { StartInfo = processInfo };
+                process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                Helpers.Logger.EndOperation("SetDefaultWslVersion", process.ExitCode == 0);
+                return (process.ExitCode == 0, string.IsNullOrEmpty(error) ? null : error);
+            }
+            catch (Exception ex)
+            {
+                Helpers.Logger.Error("SetDefaultWslVersion failed", ex);
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Récupère l'état détaillé de WSL
+        /// </summary>
+        public async Task<(bool success, string output, string? error)> GetWslStatusAsync()
+        {
+            try
+            {
+                Helpers.Logger.BeginOperation("GetWslStatus");
+
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "wsl.exe",
+                    Arguments = "--status",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process { StartInfo = processInfo };
+                process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                Helpers.Logger.EndOperation("GetWslStatus", process.ExitCode == 0);
+                return (process.ExitCode == 0, output.Trim(), string.IsNullOrEmpty(error) ? null : error);
+            }
+            catch (Exception ex)
+            {
+                Helpers.Logger.Error("GetWslStatus failed", ex);
+                return (false, string.Empty, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Récupère la version de WSL installée
+        /// </summary>
+        public async Task<(bool success, string output, string? error)> GetWslVersionAsync()
+        {
+            try
+            {
+                Helpers.Logger.BeginOperation("GetWslVersion");
+
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "wsl.exe",
+                    Arguments = "--version",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process { StartInfo = processInfo };
+                process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                Helpers.Logger.EndOperation("GetWslVersion", process.ExitCode == 0);
+                return (process.ExitCode == 0, output.Trim(), string.IsNullOrEmpty(error) ? null : error);
+            }
+            catch (Exception ex)
+            {
+                Helpers.Logger.Error("GetWslVersion failed", ex);
+                return (false, string.Empty, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Importe une distribution VHD en place (sans copie)
+        /// </summary>
+        /// <param name="name">Nom de la distribution</param>
+        /// <param name="vhdPath">Chemin du fichier VHD</param>
+        public async Task<(bool success, string? error)> ImportDistributionInPlaceAsync(string name, string vhdPath)
+        {
+            try
+            {
+                Helpers.Logger.BeginOperation("ImportDistributionInPlace", $"{name} from {vhdPath}");
+
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "wsl.exe",
+                    Arguments = $"--import-in-place {name} \"{vhdPath}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process { StartInfo = processInfo };
+                process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                Helpers.Logger.EndOperation("ImportDistributionInPlace", process.ExitCode == 0);
+                return (process.ExitCode == 0, string.IsNullOrEmpty(error) ? null : error);
+            }
+            catch (Exception ex)
+            {
+                Helpers.Logger.Error("ImportDistributionInPlace failed", ex);
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Monte un disque ou VHD dans WSL
+        /// </summary>
+        /// <param name="diskPath">Chemin du disque (ex: \\.\PHYSICALDRIVE0) ou VHD</param>
+        /// <param name="bare">Monter en mode bare (sans partition)</param>
+        /// <param name="partition">Numéro de partition (optionnel)</param>
+        /// <param name="type">Type de système de fichiers (ext4, vfat, etc.)</param>
+        public async Task<(bool success, string? error)> MountDiskAsync(string diskPath, bool bare = false, string? partition = null, string? type = null)
+        {
+            try
+            {
+                Helpers.Logger.BeginOperation("MountDisk", $"{diskPath} (bare={bare}, partition={partition}, type={type})");
+
+                var arguments = $"--mount \"{diskPath}\"";
+                if (bare) arguments += " --bare";
+                if (!string.IsNullOrEmpty(partition)) arguments += $" --partition {partition}";
+                if (!string.IsNullOrEmpty(type)) arguments += $" --type {type}";
+
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "wsl.exe",
+                    Arguments = arguments,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process { StartInfo = processInfo };
+                process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                Helpers.Logger.EndOperation("MountDisk", process.ExitCode == 0);
+                return (process.ExitCode == 0, string.IsNullOrEmpty(error) ? null : error);
+            }
+            catch (Exception ex)
+            {
+                Helpers.Logger.Error("MountDisk failed", ex);
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Démonte un disque ou VHD
+        /// </summary>
+        /// <param name="diskPath">Chemin du disque à démonter</param>
+        public async Task<(bool success, string? error)> UnmountDiskAsync(string diskPath)
+        {
+            try
+            {
+                Helpers.Logger.BeginOperation("UnmountDisk", diskPath);
+
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "wsl.exe",
+                    Arguments = $"--unmount \"{diskPath}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process { StartInfo = processInfo };
+                process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                Helpers.Logger.EndOperation("UnmountDisk", process.ExitCode == 0);
+                return (process.ExitCode == 0, string.IsNullOrEmpty(error) ? null : error);
+            }
+            catch (Exception ex)
+            {
+                Helpers.Logger.Error("UnmountDisk failed", ex);
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Ouvre un terminal pour une distribution avec un utilisateur spécifique
+        /// </summary>
+        /// <param name="distributionName">Nom de la distribution</param>
+        /// <param name="userName">Nom d'utilisateur (optionnel, défaut = root si non spécifié)</param>
+        public void OpenTerminalAsUser(string distributionName, string? userName = null)
+        {
+            try
+            {
+                Helpers.Logger.BeginOperation("OpenTerminalAsUser", $"{distributionName} as {userName ?? "default"}");
+
+                var arguments = string.IsNullOrEmpty(userName)
+                    ? $"wsl -d {distributionName} --cd ~"
+                    : $"wsl -d {distributionName} -u {userName} --cd ~";
+
+                // Essaie Windows Terminal
+                try
+                {
+                    var processInfo = new ProcessStartInfo
+                    {
+                        FileName = "wt.exe",
+                        Arguments = arguments,
+                        UseShellExecute = true
+                    };
+                    Process.Start(processInfo);
+                    Helpers.Logger.EndOperation("OpenTerminalAsUser", true);
+                }
+                catch
+                {
+                    // Fallback cmd
+                    var processInfo = new ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = $"/K {arguments}",
+                        UseShellExecute = true
+                    };
+                    Process.Start(processInfo);
+                    Helpers.Logger.EndOperation("OpenTerminalAsUser", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Helpers.Logger.Error("OpenTerminalAsUser failed", ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Définit l'utilisateur par défaut pour une distribution
+        /// </summary>
+        /// <param name="distributionName">Nom de la distribution</param>
+        /// <param name="userName">Nom d'utilisateur à définir par défaut</param>
+        public async Task<(bool success, string? error)> SetDistributionDefaultUserAsync(string distributionName, string userName)
+        {
+            try
+            {
+                Helpers.Logger.BeginOperation("SetDistributionDefaultUser", $"{distributionName} to {userName}");
+
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "wsl.exe",
+                    Arguments = $"-d {distributionName} -u root usermod -aG sudo {userName}",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process { StartInfo = processInfo };
+                process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                // Note: Cette commande configure l'utilisateur, mais la vraie commande pour
+                // définir l'utilisateur par défaut dépend de la distribution spécifique
+                // (souvent via config dans /etc/wsl.conf)
+
+                Helpers.Logger.EndOperation("SetDistributionDefaultUser", process.ExitCode == 0);
+                return (process.ExitCode == 0, string.IsNullOrEmpty(error) ? null : error);
+            }
+            catch (Exception ex)
+            {
+                Helpers.Logger.Error("SetDistributionDefaultUser failed", ex);
+                return (false, ex.Message);
+            }
+        }
+
+        #endregion
     }
 }

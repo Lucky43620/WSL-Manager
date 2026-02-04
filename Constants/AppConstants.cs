@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace WSL_Manager.Constants
 {
     /// <summary>
@@ -49,6 +51,13 @@ namespace WSL_Manager.Constants
         public const string NoDistributionsFound = "Aucune distribution WSL n'a été trouvée sur votre système.";
         public const string TerminalOpened = "Ouverture du terminal pour '{0}'.";
         public const string ExplorerOpened = "Ouverture de l'explorateur pour '{0}'.";
+        public const string WslStatusRetrieved = "État WSL récupéré avec succès.";
+        public const string WslVersionRetrieved = "Version WSL récupérée avec succès.";
+        public const string DefaultVersionSet = "Version WSL par défaut définie sur WSL {0}.";
+        public const string MountSuccess = "Disque monté avec succès dans WSL.";
+        public const string UnmountSuccess = "Disque démonté avec succès.";
+        public const string ImportSuccess = "Distribution '{0}' importée avec succès.";
+        public const string ImportInPlaceSuccess = "Distribution '{0}' importée en place avec succès.";
 
         // Messages d'avertissement
         public const string DeletingDistribution = "Suppression de '{0}' en cours... (ATTENTION: Action irréversible!)";
@@ -58,6 +67,9 @@ namespace WSL_Manager.Constants
         public const string WslUpdateWarning = "La mise à jour de WSL a échoué ou est déjà à jour.";
         public const string InstallationWarning = "L'installation a échoué ou {0} est déjà installé.";
         public const string UpdatingWsl = "Mise à jour de WSL en cours...";
+        public const string ImportingDistribution = "Import de '{0}' en cours...";
+        public const string MountingDisk = "Montage du disque en cours...";
+        public const string UnmountingDisk = "Démontage du disque en cours...";
 
         // Messages d'erreur
         public const string DistributionStartError = "Impossible de démarrer la distribution '{0}'.";
@@ -73,6 +85,12 @@ namespace WSL_Manager.Constants
         public const string ExplorerOpenError = "Impossible d'ouvrir l'explorateur : {0}";
         public const string InfoRetrievalError = "Impossible de récupérer les informations : {0}";
         public const string GenericError = "Erreur lors de {0} : {1}";
+        public const string ImportError = "Impossible d'importer la distribution : {0}";
+        public const string MountError = "Impossible de monter le disque : {0}";
+        public const string UnmountError = "Impossible de démonter le disque : {0}";
+        public const string DefaultVersionError = "Impossible de définir la version WSL par défaut : {0}";
+        public const string WslStatusError = "Impossible de récupérer l'état WSL : {0}";
+        public const string WslVersionError = "Impossible de récupérer la version WSL : {0}";
 
         // Titres
         public const string TitleSuccess = "Succès";
@@ -91,6 +109,13 @@ namespace WSL_Manager.Constants
         public const string TitleModification = "Modification réussie";
         public const string TitleShutdown = "Arrêt complet";
         public const string TitleNoDistributions = "Aucune distribution";
+        public const string TitleImport = "Import";
+        public const string TitleMount = "Montage de disque";
+        public const string TitleUnmount = "Démontage de disque";
+        public const string TitleWslStatus = "État WSL";
+        public const string TitleWslVersion = "Version WSL";
+        public const string TitleDefaultVersion = "Version par défaut";
+        public const string TitleUserSelection = "Sélection d'utilisateur";
 
         // Confirmations
         public const string DeleteConfirmationTitle = "Confirmer la suppression";
@@ -137,5 +162,37 @@ namespace WSL_Manager.Constants
         public const string StateRunning = "Running";
         public const string StateStopped = "Stopped";
         public const string StateInstalling = "Installing";
+
+        /// <summary>
+        /// Filtres de fichiers pour les dialogues
+        /// </summary>
+        public static readonly Dictionary<string, List<string>> FileFilters = new()
+        {
+            { "TAR Archives", new List<string> { ".tar", ".tar.gz", ".tgz" } },
+            { "VHD Files", new List<string> { ".vhd", ".vhdx" } },
+            { "All Files", new List<string> { "*" } }
+        };
+
+        /// <summary>
+        /// Types de systèmes de fichiers supportés pour le montage
+        /// </summary>
+        public static readonly string[] FileSystemTypes = new[]
+        {
+            "ext4",
+            "vfat",
+            "ntfs",
+            "btrfs",
+            "xfs"
+        };
+
+        /// <summary>
+        /// Emplacement par défaut pour les imports de distributions
+        /// </summary>
+        public static string DefaultImportLocation =>
+            System.IO.Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
+                "WSL",
+                "Imports"
+            );
     }
 }
