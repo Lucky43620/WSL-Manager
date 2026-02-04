@@ -1,66 +1,340 @@
 # 🐧 WSL Manager
 
-> Application Windows moderne et professionnelle pour gérer vos distributions WSL (Windows Subsystem for Linux) en toute simplicité.
+<div align="center">
 
-[![.NET](https://img.shields.io/badge/.NET-8.0-blue)](https://dotnet.microsoft.com/)
-[![WinUI](https://img.shields.io/badge/WinUI-3-brightgreen)](https://microsoft.github.io/microsoft-ui-xaml/)
-[![Platform](https://img.shields.io/badge/platform-Windows%2011-blue)](https://www.microsoft.com/windows)
+![WSL Manager](Assets/Square150x150Logo.scale-200.png)
 
----
+**Interface graphique moderne et complète pour gérer WSL (Windows Subsystem for Linux)**
 
-## ✨ Aperçu
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![WinUI 3](https://img.shields.io/badge/WinUI-3-0078D4?logo=windows&logoColor=white)](https://microsoft.github.io/microsoft-ui-xaml/)
+[![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-WSL Manager est une application native Windows qui vous permet de gérer toutes vos distributions Linux depuis une interface graphique élégante, sans jamais toucher à la ligne de commande.
+*Gérez vos distributions Linux avec style* ✨
 
-**Pourquoi WSL Manager ?**
-- 🎨 Interface ultra moderne avec effet Mica (Windows 11)
-- ⚡ Actions rapides et intuitives
-- 🔔 Notifications pour chaque opération
-- 🎯 Design professionnel et friendly
-- 📊 Vue d'ensemble claire de toutes vos distributions
+[Fonctionnalités](#-fonctionnalités) • [Installation](#-installation) • [Utilisation](#-utilisation) • [Compilation](#-compilation)
+
+</div>
 
 ---
 
-## 🎯 Fonctionnalités
+## 📋 Table des matières
+
+- [À propos](#-à-propos)
+- [Fonctionnalités](#-fonctionnalités)
+- [Configuration requise](#-configuration-requise)
+- [Installation](#-installation)
+- [Utilisation](#-utilisation)
+- [Compilation](#-compilation)
+- [Architecture](#-architecture)
+- [Captures d'écran](#-captures-décran)
+- [Contribution](#-contribution)
+- [Licence](#-licence)
+
+---
+
+## 🎯 À propos
+
+**WSL Manager** est une application Windows native qui offre une interface graphique complète et moderne pour gérer toutes vos distributions WSL. Plus besoin de mémoriser les commandes en ligne - tout se fait en quelques clics avec une interface élégante basée sur WinUI 3.
+
+### Pourquoi WSL Manager ?
+
+- 🎨 **Design moderne** avec effet Mica et animations fluides
+- ⚡ **Fonctionnalités complètes** - Toutes les commandes WSL disponibles
+- 🔔 **Notifications intelligentes** pour chaque action
+- 📊 **Vue d'ensemble claire** de toutes vos distributions
+- 🛠️ **Import/Export** de distributions (TAR et VHD)
+- 💾 **Gestion de disques** - Montage et démontage
+- 👤 **Multi-utilisateurs** - Terminal avec utilisateur spécifique
+- 🔄 **Mise à jour automatique** des packages Linux
+
+---
+
+## ✨ Fonctionnalités
 
 ### 📋 Gestion des Distributions
 
-- ✅ **Liste complète** de toutes vos distributions WSL
-- ✅ **État en temps réel** : Running (🟢) ou Stopped (⚪)
-- ✅ **Badge "Par défaut"** pour la distribution principale
-- ✅ **Version WSL** affichée (WSL 1 ou WSL 2)
-- ✅ **Rafraîchissement** automatique de la liste
+#### Actions de Base
+- ✅ **Lister** toutes les distributions avec état en temps réel
+- ✅ **Démarrer/Arrêter/Redémarrer** des distributions
+- ✅ **Installer** de nouvelles distributions (Microsoft Store ou web)
+- ✅ **Supprimer** des distributions (avec confirmation)
+- ✅ **Définir par défaut** une distribution
+- ✅ **Voir informations** système (`uname -a`)
+- ✅ **Mettre à jour packages** (apt, dnf, pacman, etc.)
 
-### ⚡ Actions Rapides
+#### Affichage
+- 🟢 **État en temps réel** : Running (vert) ou Stopped (gris)
+- 🏷️ **Badge "Par défaut"** pour la distribution principale
+- 🔢 **Version WSL** affichée (WSL 1 ou WSL 2)
+- 🎨 **Cartes élégantes** avec animations au survol
+- 🔔 **Notifications** pour toutes les opérations
 
-#### Actions Principales
-- **▶️ Démarrer** : Lance une distribution arrêtée
-- **⏹️ Arrêter** : Arrête proprement une distribution
-- **🔄 Redémarrer** : Redémarre une distribution en cours
-- **📟 Terminal** : Ouvre Windows Terminal (ou cmd) dans la distribution
-- **📁 Explorateur** : Ouvre l'explorateur Windows (`\\wsl$\nom`)
+### 🔄 Import/Export Avancé
 
-#### Actions Avancées (Menu ⋯)
-- **⭐ Définir par défaut** : Change la distribution par défaut WSL
-- **ℹ️ Informations** : Affiche les détails système (uname -a)
+- 📦 **Exporter** en TAR (archive) ou VHD (disque virtuel)
+- 📥 **Importer** depuis TAR ou VHD
+- 🎯 **Import en place** de VHD sans copie
+- ⚙️ **Choisir la version WSL** (1 ou 2) lors de l'import
+- 📂 **Emplacement personnalisé** pour les installations
+- 💾 **Sélection de fichiers** via explorateur graphique
 
-### 🔔 Notifications Intelligentes
+### 💾 Gestion de Disques
 
-Chaque action déclenche une notification claire :
+- 🔌 **Monter** des disques physiques ou VHD dans WSL
+- 🔓 **Démonter** des disques
+- 📊 **Systèmes de fichiers** : ext4, vfat, ntfs, btrfs, xfs
+- ⚙️ **Mode bare** pour montage sans partition
+- 🔢 **Sélection de partition** spécifique
 
-- **🟢 Succès** : "La distribution 'Ubuntu' a été démarrée avec succès"
-- **🔴 Erreur** : "Impossible de démarrer la distribution"
-- **🔵 Info** : "Redémarrage en cours..."
-- **🟡 Avertissement** : Messages contextuels
+### ⚙️ Configuration WSL
 
-### 🎨 Interface Moderne
+- 📊 **Afficher l'état WSL** (`wsl --status`)
+- 🔍 **Voir la version WSL** installée
+- 🔢 **Définir version par défaut** (WSL 1 ou WSL 2)
+- 🔄 **Mettre à jour WSL** (options web-download et pre-release)
+- 🔀 **Convertir** entre WSL 1 et WSL 2
+- 🌐 **Arrêter toutes** les distributions (`wsl --shutdown`)
 
-- **Cartes élégantes** pour chaque distribution
-- **Animations fluides** au survol (effet hover subtil)
-- **Ombres portées** pour un effet de profondeur
-- **État vide friendly** quand aucune distribution n'est trouvée
-- **Effet Mica** : Transparence moderne Windows 11
-- **Mode clair/sombre** : Suit automatiquement le thème système
+### 🖥️ Terminal et Explorateur
+
+- 🖥️ **Ouvrir terminal** (Windows Terminal ou cmd)
+- 👤 **Terminal avec utilisateur** spécifique
+- 🏠 **S'ouvre dans le home Linux** (`~`) automatiquement
+- 📁 **Ouvrir explorateur** Windows (`\\wsl.localhost\` ou `\\wsl$\`)
+- 🔄 **Glisser-déposer** de fichiers entre Windows et Linux
+
+### 🎨 Installation Avancée
+
+- 📋 **Liste dynamique** des distributions disponibles en ligne
+- 🌐 **Web-download** - Télécharger depuis GitHub au lieu du Store
+- 🚫 **No-launch** - Ne pas démarrer après installation
+- 📂 **Emplacement personnalisé** d'installation
+- 📝 **Nom personnalisé** (optionnel)
+- ⏳ **Barre de progression** pour installations longues
+
+### 🎨 Interface Utilisateur
+
+- 🪟 **Effet Mica** pour transparence moderne (Windows 11)
+- 🌓 **Mode clair/sombre** automatique selon le thème système
+- ✨ **Animations fluides** au survol des cartes
+- 📊 **Barres de progression** pour opérations longues
+- 🔔 **Notifications** : Info, Succès, Avertissement, Erreur
+- 📱 **Design responsive** et professionnel
+- 🎯 **État vide friendly** avec lien vers la documentation
+
+---
+
+## 💻 Configuration requise
+
+### Système d'exploitation
+- **Windows 10** version 19041 (May 2020 Update) ou supérieure
+- **Windows 11** (recommandé pour effet Mica)
+
+### Prérequis
+- **WSL 2** installé et activé
+  ```powershell
+  wsl --install
+  ```
+- **.NET Runtime 8.0** (inclus dans le package self-contained)
+- **Windows App SDK** (inclus dans le package)
+
+### Matériel
+- **Processeur** : x64 ou ARM64
+- **RAM** : 4 GB minimum (8 GB recommandé)
+- **Espace disque** : 50 MB pour l'application
+
+---
+
+## 📥 Installation
+
+### Option 1 : Télécharger l'exécutable (Recommandé)
+
+1. Allez dans [Releases](../../releases)
+2. Téléchargez `WSL-Manager-vX.X.X.zip`
+3. Extrayez le contenu dans un dossier
+4. Lancez `WSL Manager.exe`
+
+### Option 2 : Compiler depuis les sources
+
+Voir la section [Compilation](#-compilation) ci-dessous
+
+---
+
+## 🎮 Utilisation
+
+### Démarrage Rapide
+
+1. **Lancer l'application** - Double-cliquez sur `WSL Manager.exe`
+2. **Voir vos distributions** - Toutes vos distributions WSL sont affichées
+3. **Actions rapides** disponibles sur chaque carte :
+
+| Bouton | Action | Description |
+|--------|--------|-------------|
+| ▶️ | Démarrer | Lance une distribution arrêtée |
+| ⏹️ | Arrêter | Arrête une distribution en cours |
+| 🔄 | Redémarrer | Redémarre une distribution |
+| 🖥️ | Terminal | Ouvre le terminal dans la distribution |
+| 📁 | Explorateur | Ouvre l'explorateur de fichiers Windows |
+| ⚙️ | Plus | Menu avec actions avancées |
+
+### Installer une Distribution
+
+1. Cliquez sur **"Installer"** en haut
+2. La liste des distributions disponibles se charge automatiquement
+3. Sélectionnez une distribution (ex: Ubuntu, Debian, Kali)
+4. (Optionnel) Entrez un nom personnalisé
+5. (Optionnel) Développez **"Options avancées"** :
+   - ☑️ Télécharger depuis le web
+   - ☑️ Ne pas lancer après installation
+   - 📂 Emplacement personnalisé
+6. Cliquez sur **"Installer"**
+7. Attendez la fin (barre de progression affichée)
+
+### Importer une Distribution
+
+1. Cliquez sur **"Importer"** en haut
+2. Entrez le nom de la distribution
+3. Cliquez sur **"Parcourir"** et sélectionnez :
+   - Un fichier `.tar`, `.tar.gz` ou `.tgz`
+   - Un fichier `.vhd` ou `.vhdx`
+4. Choisissez l'emplacement d'installation
+5. Sélectionnez **WSL 1** ou **WSL 2**
+6. Cliquez sur **"Importer"**
+
+### Exporter une Distribution
+
+1. Cliquez sur **"..."** (Plus d'options) sur une distribution
+2. Sélectionnez **"Exporter (avancé)"**
+3. Choisissez le format :
+   - **TAR Archive** - Fichier compressé portable
+   - **VHD** - Disque virtuel
+4. Cliquez sur **"Parcourir"** pour choisir l'emplacement
+5. Cliquez sur **"Exporter"**
+
+### Mettre à Jour les Packages
+
+1. Cliquez sur **"..."** sur une distribution
+2. Sélectionnez **"Mettre à jour les packages"**
+3. WSL Manager détecte automatiquement le gestionnaire :
+   - Ubuntu/Debian → `apt update && apt upgrade`
+   - Fedora/RHEL → `dnf update`
+   - Arch → `pacman -Syu`
+   - Alpine → `apk update && apk upgrade`
+   - openSUSE → `zypper update`
+
+### Menu Avancé
+
+Cliquez sur **"Avancé"** en haut pour :
+
+- 📊 **État WSL** - Informations détaillées WSL
+- 🔍 **Version WSL** - Version installée
+- 🔢 **Définir version par défaut** - WSL 1 ou 2
+- 💾 **Monter un disque** - Disque physique ou VHD
+- 🔓 **Démonter un disque** - Retirer un disque monté
+
+### Ouvrir Terminal avec Utilisateur Spécifique
+
+1. Cliquez sur **"..."** sur une distribution
+2. Sélectionnez **"Ouvrir terminal (utilisateur)"**
+3. Entrez le nom d'utilisateur (ou laissez vide pour défaut)
+4. Le terminal s'ouvre dans `/home/utilisateur`
+
+---
+
+## 🔨 Compilation
+
+### Prérequis
+
+- **.NET SDK 8.0** ou supérieur ([Télécharger](https://dotnet.microsoft.com/download))
+- **Windows 10 SDK** (inclus avec Visual Studio)
+- **Visual Studio 2022** (recommandé) ou VS Code
+
+### Méthode 1 : Ligne de commande
+
+```bash
+# Cloner le dépôt (si git)
+git clone https://github.com/votre-username/WSL-Manager.git
+cd "WSL Manager"
+
+# Restaurer les dépendances
+dotnet restore
+
+# Compiler en Debug
+dotnet build -c Debug -p:Platform=x64
+
+# Compiler en Release
+dotnet build -c Release -p:Platform=x64
+
+# Publier (créer l'exécutable)
+dotnet publish -c Release -r win-x64 -p:Platform=x64 --self-contained true -p:PublishReadyToRun=true
+```
+
+L'exécutable se trouve dans :
+```
+bin/Release/net8.0-windows10.0.19041.0/win-x64/publish/WSL Manager.exe
+```
+
+### Méthode 2 : Visual Studio
+
+1. Ouvrez `WSL Manager.csproj` dans Visual Studio 2022
+2. Sélectionnez **Release** et **x64** en haut
+3. Cliquez sur **Générer → Générer la solution** (Ctrl+Shift+B)
+4. Pour publier :
+   - Clic droit sur le projet → **Publier**
+   - Choisissez **Dossier** comme cible
+   - Configurez les paramètres
+   - Cliquez sur **Publier**
+
+### Méthode 3 : Script automatique
+
+Créez un fichier `build.bat` :
+
+```batch
+@echo off
+echo ========================================
+echo   Compilation de WSL Manager
+echo ========================================
+
+echo.
+echo [1/3] Restauration des dependances...
+dotnet restore
+
+echo.
+echo [2/3] Compilation en Release...
+dotnet build -c Release -p:Platform=x64
+
+echo.
+echo [3/3] Publication (self-contained)...
+dotnet publish -c Release -r win-x64 -p:Platform=x64 --self-contained true -p:PublishReadyToRun=true
+
+echo.
+echo ========================================
+echo   Compilation terminee !
+echo ========================================
+echo.
+echo Executable: bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\WSL Manager.exe
+echo.
+pause
+```
+
+Puis exécutez `build.bat`
+
+### Plateformes supportées
+
+Vous pouvez compiler pour différentes architectures :
+
+```bash
+# Pour x64 (Intel/AMD 64-bit)
+dotnet publish -c Release -r win-x64 -p:Platform=x64 --self-contained true
+
+# Pour ARM64 (processeurs ARM)
+dotnet publish -c Release -r win-arm64 -p:Platform=ARM64 --self-contained true
+
+# Pour x86 (32-bit, legacy)
+dotnet publish -c Release -r win-x86 -p:Platform=x86 --self-contained true
+```
 
 ---
 
@@ -70,31 +344,36 @@ Ce projet utilise le **pattern MVVM** (Model-View-ViewModel) pour une architectu
 
 ```
 WSL Manager/
-├── Models/              → Classes de données
-│   └── WslDistribution.cs          # Représente une distribution WSL
+├── 📁 Models/
+│   └── WslDistribution.cs          # Modèle de données d'une distribution
 │
-├── ViewModels/          → Logique métier
-│   ├── ViewModelBase.cs            # Classe de base avec INotifyPropertyChanged
-│   └── MainViewModel.cs            # ViewModel principal (8 commandes)
+├── 📁 ViewModels/
+│   ├── ViewModelBase.cs            # Base avec INotifyPropertyChanged
+│   └── MainViewModel.cs            # ViewModel principal (16 commandes)
 │
-├── Services/            → Services métier
-│   ├── WslService.cs               # Interaction avec WSL (wsl.exe)
-│   └── NotificationService.cs      # Système de notifications centralisé
+├── 📁 Services/
+│   ├── WslService.cs               # Service WSL (20+ méthodes)
+│   └── NotificationService.cs      # Service de notifications
 │
-├── Helpers/             → Classes utilitaires
-│   └── RelayCommand.cs             # Implémentation ICommand pour MVVM
+├── 📁 Helpers/
+│   ├── RelayCommand.cs             # Implémentation ICommand
+│   └── Logger.cs                   # Logging structuré
 │
-├── Converters/          → Convertisseurs XAML
-│   ├── BoolToVisibilityConverter.cs     # bool → Visibility
-│   └── StateToColorConverter.cs         # bool → Couleur (vert/gris)
+├── 📁 Converters/
+│   ├── BoolToVisibilityConverter.cs
+│   └── StateToColorConverter.cs
 │
-├── MainWindow.xaml      → Interface utilisateur
-└── App.xaml            → Configuration application
+├── 📁 Constants/
+│   └── AppConstants.cs             # Messages et constantes
+│
+├── MainWindow.xaml                 # Interface utilisateur
+├── MainWindow.xaml.cs              # Code-behind (dialogues)
+└── App.xaml                        # Configuration application
 ```
 
-### 🎯 Pattern MVVM
+### Pattern MVVM
 
-**Model** → Données brutes (WslDistribution)
+**Model** → Données brutes
 ```csharp
 public class WslDistribution
 {
@@ -108,466 +387,162 @@ public class WslDistribution
 
 **View** → Interface XAML avec binding
 ```xaml
-<ListView ItemsSource="{Binding Distributions}">
+<ItemsRepeater ItemsSource="{Binding Distributions}">
 ```
 
 **ViewModel** → Logique métier
 ```csharp
-public class MainViewModel
-{
-    public ObservableCollection<WslDistribution> Distributions { get; }
-    public ICommand StartCommand { get; }
-    public ICommand StopCommand { get; }
-    // ... 6 autres commandes
-}
+public ObservableCollection<WslDistribution> Distributions { get; }
+public ICommand StartCommand { get; }
+public ICommand StopCommand { get; }
+// ... 14 autres commandes
 ```
+
+### Services Principaux
+
+#### WslService.cs - 20+ méthodes
+
+**Gestion de base**
+- `GetDistributionsAsync()` - Liste toutes les distributions
+- `StartDistributionAsync()` - Démarre une distribution
+- `StopDistributionAsync()` - Arrête une distribution
+- `RestartDistributionAsync()` - Redémarre
+- `SetDefaultDistributionAsync()` - Définit par défaut
+- `UnregisterDistributionAsync()` - Supprime
+- `ShutdownAllAsync()` - Arrête toutes
+
+**Installation et mise à jour**
+- `InstallDistributionAsync()` - Installe (avec options)
+- `GetAvailableDistributionsAsync()` - Liste disponibles
+- `UpdateDistributionPackagesAsync()` - Met à jour packages
+- `UpdateWslAsync()` - Met à jour WSL
+
+**Import/Export**
+- `ExportDistributionAsync()` - Exporte TAR ou VHD
+- `ImportDistributionAsync()` - Importe avec options
+- `ImportDistributionInPlaceAsync()` - Import VHD en place
+
+**Gestion disques**
+- `MountDiskAsync()` - Monte disque/VHD
+- `UnmountDiskAsync()` - Démonte disque
+
+**Configuration**
+- `ConvertWslVersionAsync()` - Convertit WSL 1↔2
+- `SetDefaultWslVersionAsync()` - Version par défaut
+- `GetWslStatusAsync()` - État WSL
+- `GetWslVersionAsync()` - Version WSL
+
+**Terminal et informations**
+- `OpenTerminal()` - Ouvre terminal
+- `OpenTerminalAsUser()` - Terminal avec utilisateur
+- `OpenFileExplorer()` - Ouvre explorateur
+- `GetDistributionInfoAsync()` - Infos système
 
 ---
 
-## 🚀 Installation & Utilisation
+## 📸 Captures d'écran
 
-### Prérequis
+### Interface Principale
+![Interface](docs/screenshots/main.png)
+*Vue d'ensemble avec plusieurs distributions*
 
-- **Windows 10** (version 19041+) ou **Windows 11**
-- **WSL** installé (`wsl --install`)
-- **.NET 8 SDK** ([Télécharger](https://dotnet.microsoft.com/download))
-- **Visual Studio 2022** (recommandé) ou VS Code
+### Installation
+![Installation](docs/screenshots/install.png)
+*Dialogue d'installation avec options avancées*
 
-### Compiler le Projet
+### Import/Export
+![Import](docs/screenshots/import.png)
+*Import de distribution avec sélection de version WSL*
 
+### Menu Avancé
+![Advanced](docs/screenshots/advanced.png)
+*Menu avec fonctionnalités avancées*
+
+---
+
+## 🐛 Dépannage
+
+### L'application ne démarre pas
+- ✅ Vérifiez que WSL est installé : `wsl --version`
+- ✅ Windows 10 19041+ ou Windows 11 requis
+- ✅ Installez .NET Runtime 8.0 si message d'erreur
+
+### "Aucune distribution trouvée"
+- ✅ Installez une distribution : `wsl --install -d Ubuntu`
+- ✅ Cliquez sur "Rafraîchir" après installation
+
+### Erreur lors de l'import
+- ✅ Vérifiez que le fichier n'est pas corrompu
+- ✅ Essayez avec un emplacement différent
+- ✅ Assurez-vous d'avoir l'espace disque nécessaire
+
+### Le terminal ne s'ouvre pas
+- ✅ L'application utilise cmd.exe en fallback si Windows Terminal n'est pas installé
+- ✅ Installez [Windows Terminal](https://aka.ms/terminal) pour une meilleure expérience
+
+### Erreur de compilation
 ```bash
-# Cloner le repository (si git)
-git clone https://github.com/votre-repo/wsl-manager.git
-cd wsl-manager
-
-# Compiler avec .NET CLI
-dotnet build "WSL Manager.csproj" -p:Platform=x64
-
-# Ou ouvrir dans Visual Studio
-# WSL Manager.slnx → Sélectionner x64 → F5
-```
-
-### Exécuter l'Application
-
-```bash
-# Via .NET CLI
-cd "bin/x64/Debug/net8.0-windows10.0.19041.0/win-x64/"
-./WSL Manager.exe
-
-# Ou via Visual Studio
-# Appuyez sur F5 (Démarrer)
-```
-
----
-
-## 📖 Guide d'Utilisation
-
-### Démarrer une Distribution
-
-1. Trouvez la carte de votre distribution (ex: Ubuntu)
-2. Cliquez sur le bouton **▶️ Démarrer**
-3. Une notification confirme le démarrage
-4. L'indicateur passe au 🟢 vert
-
-### Ouvrir un Terminal
-
-1. Sur la carte de la distribution souhaitée
-2. Cliquez sur **📟 Terminal**
-3. Windows Terminal s'ouvre automatiquement
-   - Si Windows Terminal n'est pas installé, cmd.exe est utilisé
-
-### Accéder aux Fichiers Linux
-
-1. Sur la carte de la distribution
-2. Cliquez sur **📁 Explorateur**
-3. L'Explorateur Windows s'ouvre sur `\\wsl$\nom-distribution`
-4. Vous pouvez glisser-déposer des fichiers entre Windows et Linux !
-
-### Changer la Distribution par Défaut
-
-1. Cliquez sur **⋯ Plus d'options**
-2. Sélectionnez **"Définir par défaut"**
-3. Le badge "Par défaut" se déplace sur cette distribution
-4. La commande `wsl` utilisera maintenant cette distribution
-
----
-
-## 🔧 Configuration
-
-### Structure du Code
-
-#### WslService.cs
-
-Service principal pour interagir avec WSL :
-
-```csharp
-// Liste les distributions
-Task<List<WslDistribution>> GetDistributionsAsync()
-
-// Démarre une distribution
-Task<bool> StartDistributionAsync(string name)
-
-// Arrête une distribution
-Task<bool> StopDistributionAsync(string name)
-
-// Redémarre (arrêt + démarrage)
-Task<bool> RestartDistributionAsync(string name)
-
-// Ouvre un terminal
-void OpenTerminal(string name)
-
-// Ouvre l'explorateur
-void OpenFileExplorer(string name)
-
-// Définit par défaut
-Task<bool> SetDefaultDistributionAsync(string name)
-
-// Récupère les infos système
-Task<string> GetDistributionInfoAsync(string name)
-```
-
-#### NotificationService.cs
-
-Service de notifications singleton :
-
-```csharp
-// Instance unique
-NotificationService.Instance
-
-// Afficher une notification
-ShowInfo(string message, string? title = null)
-ShowSuccess(string message, string? title = null)
-ShowWarning(string message, string? title = null)
-ShowError(string message, string? title = null)
-```
-
-#### MainViewModel.cs
-
-ViewModel principal avec toutes les commandes :
-
-```csharp
-// Propriétés
-ObservableCollection<WslDistribution> Distributions
-bool IsLoading
-bool IsEmptyState
-bool HasDistributions
-
-// Commandes
-ICommand RefreshCommand          // Rafraîchir la liste
-ICommand StartCommand            // Démarrer
-ICommand StopCommand             // Arrêter
-ICommand RestartCommand          // Redémarrer
-ICommand OpenTerminalCommand     // Terminal
-ICommand OpenExplorerCommand     // Explorateur
-ICommand SetDefaultCommand       // Définir par défaut
-ICommand ShowInfoCommand         // Informations
-```
-
----
-
-## 📝 Changelog
-
-### Version 2.0 (Phase 2) - Interface Ultra Pro ✨
-
-**🎨 Design Complet Redesigné**
-- Interface refaite avec cartes modernes et ombres
-- Animations au survol pour un effet premium
-- État vide avec message friendly et lien documentation
-- Effet Mica pour transparence Windows 11
-- Indicateurs d'état avec points colorés et ombres
-
-**🔔 Système de Notifications**
-- Service de notifications centralisé (singleton)
-- InfoBar intégrée en haut de l'application
-- 4 types : Info, Succès, Warning, Erreur
-- Feedback immédiat pour toutes les opérations
-- Messages clairs et contextuels
-
-**⚡ Nouvelles Fonctionnalités**
-- 🔄 Redémarrage de distributions
-- 📟 Ouverture de terminal (Windows Terminal + fallback cmd)
-- 📁 Ouverture de l'explorateur Windows (`\\wsl$\`)
-- ⭐ Définir distribution par défaut
-- ℹ️ Affichage informations système (uname)
-- Menu "Plus d'options" avec actions avancées
-
-**🏗️ Architecture Améliorée**
-- NotificationService.cs ajouté
-- WslService.cs étendu (8 méthodes)
-- MainViewModel.cs : 8 commandes au total
-- Commentaires XML exhaustifs sur toutes les méthodes
-- Gestion d'erreurs complète avec try-catch
-- Null safety : vérifications systématiques
-
-**🐛 Corrections**
-- Animation au survol corrigée (opacité au lieu de scale)
-- Gestion des erreurs améliorée
-- Thread UI : DispatcherQueue pour notifications
-
-### Version 1.0 (Phase 1) - Foundation
-
-**✅ Fonctionnalités de Base**
-- Liste des distributions WSL
-- Affichage de l'état (Running/Stopped)
-- Version WSL (1 ou 2)
-- Badge "Par défaut"
-- Démarrer une distribution
-- Arrêter une distribution
-- Rafraîchir la liste
-
-**🏗️ Architecture MVVM**
-- Models : WslDistribution
-- ViewModels : ViewModelBase, MainViewModel
-- Services : WslService
-- Helpers : RelayCommand
-- Converters : BoolToVisibility, StateToColor
-
----
-
-## 🎓 Technologies Utilisées
-
-| Technologie | Version | Usage |
-|-------------|---------|-------|
-| **.NET** | 8.0 | Framework principal |
-| **WinUI 3** | 1.8 | Interface utilisateur moderne |
-| **Windows App SDK** | 1.8 | APIs Windows natives |
-| **C#** | 12.0 | Langage de programmation |
-| **XAML** | - | Markup pour l'interface |
-
-### Packages NuGet
-
-```xml
-<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7463" />
-<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260101001" />
-```
-
----
-
-## 🔍 Résolution de Problèmes
-
-### "Aucune distribution WSL trouvée"
-
-**Problème** : WSL n'est pas installé ou aucune distribution installée
-
-**Solution** :
-```powershell
-# Installer WSL avec Ubuntu par défaut
-wsl --install
-
-# Ou installer une distribution spécifique
-wsl --install -d Debian
-wsl --install -d Ubuntu-22.04
-```
-
-### Le Terminal ne s'ouvre pas
-
-**Problème** : Windows Terminal n'est pas installé
-
-**Solution** :
-- L'application utilise automatiquement `cmd.exe` en fallback
-- Ou installez Windows Terminal depuis le [Microsoft Store](https://aka.ms/terminal)
-
-### Erreur de Compilation
-
-**Problème** : `error : Packaged .NET applications ... cannot be ProcessorArchitecture neutral`
-
-**Solution** :
-```bash
-# Compiler avec une plateforme spécifique
+# Spécifiez toujours la plateforme
 dotnet build -p:Platform=x64
-# Ou x86, ARM64
+
+# Ou pour ARM
+dotnet build -p:Platform=ARM64
 ```
-
-### La Distribution ne Démarre pas
-
-**Problème** : Distribution corrompue ou erreur WSL
-
-**Solution** :
-1. Essayez le bouton **🔄 Redémarrer**
-2. Redémarrez Windows
-3. En dernier recours :
-```powershell
-# Arrêter WSL complètement
-wsl --shutdown
-
-# Puis redémarrer la distribution
-wsl -d Ubuntu
-```
-
----
-
-## 🎨 Personnalisation
-
-### Modifier les Couleurs
-
-Les couleurs sont définies via les ressources XAML :
-
-```xaml
-<!-- Dans App.xaml -->
-<SolidColorBrush x:Key="CustomAccentColor" Color="#0078D4"/>
-```
-
-### Ajouter une Nouvelle Action
-
-1. **Ajouter la méthode dans WslService.cs** :
-```csharp
-public async Task<bool> NouvelleFonction(string name)
-{
-    // Votre logique
-}
-```
-
-2. **Ajouter la commande dans MainViewModel.cs** :
-```csharp
-public ICommand NouvelleCommande { get; }
-
-// Dans le constructeur
-NouvelleCommande = new RelayCommand<WslDistribution>(async (dist) =>
-    await ExecuterNouvelleFonction(dist));
-```
-
-3. **Ajouter le bouton dans MainWindow.xaml** :
-```xaml
-<Button Command="{Binding NouvelleCommande}"
-        CommandParameter="{Binding}">
-    <SymbolIcon Symbol="VotreIcone"/>
-</Button>
-```
-
----
-
-## 🚀 Roadmap (Phase 3 - À venir)
-
-### Gestion Avancée
-- [ ] Import de distributions (.tar, .tar.gz)
-- [ ] Export de distributions
-- [ ] Suppression de distributions (avec confirmation)
-- [ ] Conversion WSL 1 ↔ WSL 2
-- [ ] Configuration mémoire/CPU par distribution
-
-### Monitoring
-- [ ] Utilisation mémoire en temps réel
-- [ ] Utilisation CPU
-- [ ] Espace disque utilisé
-- [ ] Graphiques de performance
-- [ ] Historique d'utilisation
-
-### Configuration
-- [ ] Page de paramètres
-- [ ] Thème personnalisable (clair/sombre/auto)
-- [ ] Choix du terminal par défaut
-- [ ] Raccourcis clavier personnalisables
-- [ ] Auto-démarrage avec Windows
-
-### Fonctionnalités Pro
-- [ ] Scripts de démarrage automatiques
-- [ ] Snapshots/Backups de distributions
-- [ ] Profils de configuration
-- [ ] Multi-sélection et actions groupées
-- [ ] Recherche/Filtrage de distributions
 
 ---
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! Si vous souhaitez améliorer WSL Manager :
+Les contributions sont les bienvenues ! Voici comment contribuer :
 
-1. Forkez le projet
-2. Créez une branche (`git checkout -b feature/NouvelleFonctionnalité`)
-3. Committez vos changements (`git commit -m 'Ajout nouvelle fonctionnalité'`)
-4. Pushez vers la branche (`git push origin feature/NouvelleFonctionnalité`)
-5. Ouvrez une Pull Request
+1. **Fork** le projet
+2. Créez une **branche** (`git checkout -b feature/NouvelleFonctionnalite`)
+3. **Committez** (`git commit -m 'Ajout nouvelle fonctionnalité'`)
+4. **Push** (`git push origin feature/NouvelleFonctionnalite`)
+5. Ouvrez une **Pull Request**
 
-### Standards de Code
+### Guidelines
 
-- **Commentaires XML** sur toutes les méthodes publiques
-- **Gestion d'erreurs** complète avec try-catch
-- **Notifications** pour feedback utilisateur
-- **Null safety** : vérifications systématiques
-- **Nommage** : Conventions C# standards
-
----
-
-## 📄 Licence
-
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+- ✅ Commentaires XML sur méthodes publiques
+- ✅ Gestion d'erreurs complète
+- ✅ Tests unitaires si applicable
+- ✅ Respect du pattern MVVM
+- ✅ Code formaté et propre
 
 ---
 
-## 📚 Ressources
+## 📜 Licence
 
-### Documentation Officielle
+Ce projet est sous licence **MIT** - voir [LICENSE](LICENSE)
 
-- [Documentation WSL](https://learn.microsoft.com/windows/wsl/)
-- [WinUI 3 Docs](https://learn.microsoft.com/windows/apps/winui/winui3/)
-- [Pattern MVVM](https://learn.microsoft.com/dotnet/architecture/maui/mvvm)
-- [C# Documentation](https://learn.microsoft.com/dotnet/csharp/)
-
-### Commandes WSL Utiles
-
-```powershell
-# Lister les distributions
-wsl --list --verbose
-wsl -l -v
-
-# Démarrer une distribution
-wsl -d Ubuntu
-
-# Arrêter une distribution
-wsl --terminate Ubuntu
-
-# Arrêter toutes les distributions
-wsl --shutdown
-
-# Définir par défaut
-wsl --set-default Ubuntu
-
-# Mettre à jour WSL
-wsl --update
-
-# Voir la version WSL
-wsl --version
-
-# Importer une distribution
-wsl --import <Nom> <Emplacement> <Fichier.tar>
-
-# Exporter une distribution
-wsl --export <Nom> <Fichier.tar>
-
-# Désinstaller une distribution
-wsl --unregister Ubuntu
+```
+MIT License - Copyright (c) 2026 WSL Manager
 ```
 
-### Communauté
+---
 
-- [Reddit r/bashonubuntuonwindows](https://reddit.com/r/bashonubuntuonwindows)
-- [WSL GitHub Issues](https://github.com/microsoft/WSL/issues)
-- [Stack Overflow - WSL](https://stackoverflow.com/questions/tagged/wsl)
+## 🙏 Remerciements
+
+- **Microsoft** pour WSL, WinUI 3 et .NET
+- **Communauté .NET** pour les ressources
+- **Tous les contributeurs** au projet
 
 ---
 
-## 👨‍💻 Auteur
+## 📞 Contact & Support
 
-Développé avec ❤️ pour la communauté WSL
-
-**Technologies** : .NET 8, WinUI 3, C# 12, XAML
-**Pattern** : MVVM (Model-View-ViewModel)
-**Compatibilité** : Windows 10 (19041+) / Windows 11
-
----
-
-## 🌟 Remerciements
-
-- **Microsoft** pour WSL et WinUI 3
-- **Communauté .NET** pour les ressources et support
-- **Vous** pour utiliser WSL Manager ! 🎉
+- **Issues** : [GitHub Issues](../../issues)
+- **Discussions** : [GitHub Discussions](../../discussions)
+- **Documentation WSL** : [Microsoft Learn](https://learn.microsoft.com/windows/wsl/)
 
 ---
 
 <div align="center">
 
-**[⬆ Retour en haut](#-wsl-manager)**
+**⭐ Mettez une étoile si ce projet vous aide ! ⭐**
 
-*WSL Manager - Gérez vos distributions Linux avec style* ✨🐧
+Fait avec ❤️ et ☕ par Lucas
+
+[⬆ Retour en haut](#-wsl-manager)
 
 </div>
